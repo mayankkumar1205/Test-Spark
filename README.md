@@ -6,7 +6,7 @@ Built for AI for Bharat Hackathon.
 
 🌐 Live Demo
 
-Frontend URL: https://your-frontend.vercel.app
+Frontend URL: https://69a46ede341a8811be67870e--shiny-cannoli-0ca8e6.netlify.app/judge
 Backend URL: https://testspark-api.onrender.com/api/eval/custom
 
 🧠 Overview
