@@ -1,200 +1,99 @@
+import { api } from "./api";
+
 export async function evaluateCustomDataset(payload) {
-  console.log("Mock payload:", payload);
-
-  // Simulate delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  return {
-    success: true,
-    data: {
-      summary: {
-        total: 2,
-        passed: 1,
-        failed: 1,
-        accuracy: 50,
-      },
-      results: [
-        {
-          input: "What is 2+2?",
-          expected: "4",
-          modelOutput: "4",
-          passed: true,
-        },
-        {
-          input: "Capital of France?",
-          expected: "Paris",
-          modelOutput: "The capital is Paris.",
-          passed: false,
-        },
-      ],
-    },
-  };
+  // send payload to backend custom evaluation endpoint
+  try {
+    const res = await api.post("/api/eval/custom", payload);
+    return res.data;
+  } catch (err) {
+    console.error("evaluateCustomDataset error", err);
+    // return a standardized error object
+    return {
+      success: false,
+      error: err.response?.data || err.message || "Unknown error",
+    };
+  }
 }
 
 export async function testBenchmark(payload) {
-  console.log("Mock benchmark payload:", payload);
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  return {
-    success: true,
-    data: {
-      benchmarkType: payload.benchmarkType,
-      overall: {
-        total: 10,
-        passed: 7,
-        accuracy: 70,
-        averageScore: 7.8,
-      },
-      byCategory: {
-        algebra: { total: 3, passed: 3, accuracy: 100 },
-        geometry: { total: 4, passed: 2, accuracy: 50 },
-        number_theory: { total: 3, passed: 2, accuracy: 66.7 },
-      },
-    },
-  };
+  try {
+    const res = await api.post("/api/eval/benchmark", payload);
+    return res.data;
+  } catch (err) {
+    console.error("testBenchmark error", err);
+    return { success: false, error: err.response?.data || err.message };
+  }
 }
 
 export async function getEvaluationRuns() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return {
-    success: true,
-    data: {
-      runs: [
-        {
-          _id: "run_1",
-          runName: "GPT-4 Baseline",
-          status: "completed",
-          progress: { completed: 10, total: 10 },
-          createdAt: "2026-03-01",
-        },
-        {
-          _id: "run_2",
-          runName: "Phi-2 Adversarial Test",
-          status: "running",
-          progress: { completed: 5, total: 10 },
-          createdAt: "2026-03-02",
-        },
-        {
-          _id: "run_3",
-          runName: "Qwen Benchmark",
-          status: "pending",
-          progress: { completed: 0, total: 10 },
-          createdAt: "2026-03-03",
-        },
-      ],
-    },
-  };
+  try {
+    const res = await api.get("/api/runs");
+    return res.data;
+  } catch (err) {
+    console.error("getEvaluationRuns error", err);
+    return { success: false, error: err.response?.data || err.message };
+  }
 }
 
 export async function getDashboardStats() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return {
-    success: true,
-    data: {
-      totalRuns: 24,
-      completedRuns: 18,
-      activeRuns: 3,
-      averageAccuracy: 72,
-      trend: [
-        { name: "Mon", accuracy: 65 },
-        { name: "Tue", accuracy: 70 },
-        { name: "Wed", accuracy: 75 },
-        { name: "Thu", accuracy: 68 },
-        { name: "Fri", accuracy: 80 },
-      ],
-    },
-  };
+  try {
+    const res = await api.get("/api/dashboard");
+    return res.data;
+  } catch (err) {
+    console.warn("dashboard endpoint missing, computing from runs", err);
+    // fallback: fetch runs and compute basic stats
+    try {
+      const runsRes = await api.get("/api/runs");
+      const runs = runsRes.data?.data?.runs || [];
+      const totalRuns = runs.length;
+      const completedRuns = runs.filter(r => r.status === "completed").length;
+      const activeRuns = runs.filter(r => r.status === "running").length;
+      const averageAccuracy = runs.reduce((sum, r) => sum + (r.accuracy||0), 0) / (totalRuns || 1);
+      return {
+        success: true,
+        data: {
+          totalRuns,
+          completedRuns,
+          activeRuns,
+          averageAccuracy: Math.round(averageAccuracy),
+          trend: []
+        }
+      };
+    } catch (e) {
+      console.error("failed to compute dashboard from runs", e);
+      return { success: false, error: e.response?.data || e.message };
+    }
+  }
 }
 
 export async function generateVariants(payload) {
-  console.log("Mock generator payload:", payload);
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  return {
-    success: true,
-    data: [
-      {
-        _id: "tc_1",
-        prompt: "What is the capital?",
-        generationType: "ambiguity",
-      },
-      {
-        _id: "tc_2",
-        prompt: "What is the capital of France, which is not Paris?",
-        generationType: "contradiction",
-      },
-      {
-        _id: "tc_3",
-        prompt: "What is NOT the capital of France?",
-        generationType: "negation",
-      },
-    ],
-  };
+  try {
+    const res = await api.post("/api/generate", payload);
+    return res.data;
+  } catch (err) {
+    console.error("generateVariants error", err);
+    return { success: false, error: err.response?.data || err.message };
+  }
 }
 
 export async function judgeResponse(payload) {
-  console.log("Mock judge payload:", payload);
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  return {
-    success: true,
-    data: {
-      score: 8.5,
-      passed: true,
-      reasoning:
-        "The response demonstrates strong understanding with minor gaps.",
-      criteria: {
-        accuracy: 9,
-        relevance: 8,
-        coherence: 9,
-        completeness: 8,
-      },
-      feedback:
-        "Excellent explanation. Consider adding one more real-world example.",
-    },
-  };
+  try {
+    const res = await api.post("/api/judge", payload);
+    return res.data;
+  } catch (err) {
+    console.error("judgeResponse error", err);
+    return { success: false, error: err.response?.data || err.message };
+  }
 }
 
 export async function compareModels() {
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-
-  return {
-    success: true,
-    data: [
-      {
-        name: "GPT-4",
-        accuracy: 85,
-        categories: {
-          algebra: 90,
-          geometry: 80,
-          number_theory: 85,
-        },
-      },
-      {
-        name: "Claude",
-        accuracy: 78,
-        categories: {
-          algebra: 75,
-          geometry: 82,
-          number_theory: 77,
-        },
-      },
-      {
-        name: "Qwen",
-        accuracy: 70,
-        categories: {
-          algebra: 65,
-          geometry: 72,
-          number_theory: 73,
-        },
-      },
-    ],
-  };
+  try {
+    const res = await api.get("/api/compare");
+    return res.data;
+  } catch (err) {
+    console.error("compareModels error", err);
+    return { success: false, error: err.response?.data || err.message };
+  }
 }
 
 export async function comprehensiveTest(payload) {

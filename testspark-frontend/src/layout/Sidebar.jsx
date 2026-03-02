@@ -11,32 +11,23 @@ export default function Sidebar() {
       </h1>
 
       <nav className="space-y-2">
-        <NavLink to="/" className={linkStyle}>
+        <NavLink to="/dashboard" className={linkStyle}>
           Dashboard
         </NavLink>
-        <NavLink to="/evaluation/custom" className={linkStyle}>
+        <NavLink to="/dashboard/evaluation/custom" className={linkStyle}>
   Custom Evaluation
 </NavLink>
-<NavLink to="/evaluation/benchmark" className={linkStyle}>
+<NavLink to="/dashboard/evaluation/benchmark" className={linkStyle}>
   Benchmark Evaluation
 </NavLink>
-<NavLink to="/runs" className={linkStyle}>
+<NavLink to="/dashboard/runs" className={linkStyle}>
   Evaluation Runs
 </NavLink>
-<NavLink to="/generator" className={linkStyle}>
+<NavLink to="/dashboard/generator" className={linkStyle}>
   Test Case Generator
 </NavLink>
-<NavLink to="/judge" className={linkStyle}>
-  LLM Judge
-</NavLink>
-<NavLink to="/compare" className={linkStyle}>
-  Model Comparison
-</NavLink>
-<NavLink to="/evaluation/comprehensive" className={linkStyle}>
+<NavLink to="/dashboard/evaluation/comprehensive" className={linkStyle}>
   Comprehensive Test
-</NavLink>
-<NavLink to="/testcases" className={linkStyle}>
-  Test Case Manager
 </NavLink>
       </nav>
       
